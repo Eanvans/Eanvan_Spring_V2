@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC  "-//mybatis.org//DTD mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.Eanvan.mapper.MessageMapper">
+
+    <resultMap id="annoMap" type="com.Eanvan.model.Announcement">
+        <id column="amid" property="amid"></id>
+        <result column="title" property="title"></result>
+        <result column="content" property="content"></result>
+        <result column="updatetime" property="updateTime"></result>
+        <association property="user" javaType="com.Eanvan.model.User" resultMap="userMap"/>
+    </resultMap>
+
+    <resultMap id="userMap" type="com.Eanvan.model.User">
+        <id column="uid" property="uid"></id>
+        <result column="username" property="username"></result>
+        <result column="head_url" property="headUrl"></result>
+    </resultMap>
+
+
+    <select id="listMessageByUid" resultType="com.Eanvan.model.Message">
+          select * from tb_message where uid=#{uid}
+    </select>
+
+    <select id="getAnnouncementCounts" resultType="int">
+        select count(amid) from tb_announcement
+    </select>
+
+    <select id="listAnnouncementByTime" resultMap="annoMap">
+        SELECT  a.`amid`,a.`title`,a.`content`,a.`updatetime`,u.`uid`,u.`username`,u.`head_url`
+        FROM tb_user u JOIN tb_announcement a WHERE a.`uid` = u.`uid`
+        ORDER BY amid DESC LIMIT #{offset},#{limit};
+    </select>
+
+    <select id="getAnnouncementByAmid" resultMap="annoMap">
+        SELECT  a.`amid`,a.`title`,a.`content`,a.`updatetime`,u.`uid`,u.`username`,u.`head_url`
+        FROM tb_user u JOIN tb_announcement a WHERE a.`uid` = u.`uid` and a.`amid` = #{amid};
+    </select>
+</mapper>

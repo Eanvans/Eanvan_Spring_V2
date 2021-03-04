@@ -1,0 +1,65 @@
+<!--beans的自动配置容易出现问题，建议多核对-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--开启注解扫描-->
+    <context:component-scan base-package="com.Eanvan"/>
+
+    <!--MutiPartsResolver处理器,上传文件-->
+    <bean id="multipartResolver"  class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="defaultEncoding" value="UTF-8"/>
+        <!--指定所上传的文件大小-->
+        <property name="maxUploadSize" value="20000000"/>
+        <property name="maxInMemorySize" value="40960"/>
+    </bean>
+
+    <!--视图解析器   JSP-->
+    <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <!--<property name="viewClass"  value="org.springframework.web.servlet.view.InternalResourceView"/>-->
+        <!--设置前缀，即视图的所在路径-->
+        <property name="prefix" value="/WEB-INF/view/"/>
+        <!--设置后缀，即视图的扩展名-->
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+    <!--开启SoringMVC框架注解的支持-->
+    <mvc:annotation-driven/>
+    <!-- 允许对静态资源文件的访问 -->
+    <!--将静态资源交给defaultServlet处理，不给springmvc处理-->
+    <mvc:default-servlet-handler/>
+
+    <!--配置拦截器-->
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/*"/>
+            <bean class="com.Eanvan.interceptor.LoginInterceptor">
+                <property name="excludeUrls">
+                    <list>
+                        <value>/eanvan</value>
+                        <value>/about</value>
+                        <value>/toEanvanBlog</value>
+                        <value>/index</value>
+                        <value>/login</value>
+                        <value>/register</value>
+                        <value>/toLogin</value>
+                        <value>/toRegister</value>
+                        <value>/test</value>
+                        <value>/upload</value>
+                        <value>/checkUsername</value>
+                        <value>/toPostDetail</value>
+                    </list>
+                </property>
+            </bean>
+        </mvc:interceptor>
+    </mvc:interceptors>
+
+</beans>

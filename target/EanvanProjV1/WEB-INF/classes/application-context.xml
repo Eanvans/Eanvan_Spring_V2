@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context-3.0.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
+
+    <context:property-placeholder location="classpath:Eanvan.properties"/>
+
+    <!--数据源-->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">
+        <!--数据库基本配置信息-->
+        <property name="url" value="${mysql.url}"/>
+        <property name="username" value="${mysql.username}"/>
+        <property name="password" value="${mysql.password}"/>
+        <property name="driverClassName" value="${mysql.driverClassName}"/>
+        <property name="maxActive" value="${mysql.maxActive}"/>
+        <property name="initialSize" value="${mysql.init}"/>
+        <property name="maxWait" value="${mysql.timeout}"/>
+        <property name="minIdle" value="${mysql.minIdle}"/>
+        <!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+        <property name="timeBetweenEvictionRunsMillis" value="${mysql.timeBetweenEvictionRunsMillis}"/>
+        <!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+        <property name="minEvictableIdleTimeMillis" value="${mysql.minEvictableIdleTimeMillis}"/>
+    </bean>
+
+    <!--暂时停用Redis服务
+        &lt;!&ndash;Redis连接池配置&ndash;&gt;
+        <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+            <property name="maxTotal" value="${redis.pool.maxActive}"/>
+            <property name="maxIdle" value="${redis.pool.maxIdle}"/>
+            <property name="minIdle" value="${redis.pool.minIdle}"/>
+            <property name="maxWaitMillis" value="${redis.pool.maxWait}"/>
+            <property name="testOnBorrow" value="${redis.pool.testOnBorrow}"/>
+            <property name="testOnReturn" value="${redis.pool.testOnReturn}"/>
+        </bean>
+
+        <bean id="jedisPool" class="redis.clients.jedis.JedisPool">
+            <constructor-arg index="0" ref="jedisPoolConfig"/>
+            <constructor-arg index="1" value="${redis.hostName}"/>
+            <constructor-arg index="2" value="${redis.port}"/>
+            <constructor-arg index="3" value="${redis.timeout}"/>
+            <constructor-arg index="4" value="${redis.password}"/>
+        </bean>-->
+
+    <!--spring 邮件处理-->
+    <bean id="javaMailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+        <property name="host" value="${mail.host}"/>
+        <property name="username" value="${mail.username}"/>
+        <property name="password" value="${mail.password}"/>
+        <property name="defaultEncoding" value="${mail.defaultEncoding}"/>
+        <property name="javaMailProperties">
+            <props>
+                <prop key="mail.smtp.auth">true</prop>
+            </props>
+        </property>
+    </bean>
+
+
+    <!--注解：声明式事务-->
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!--session工厂-->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="configLocation" value="classpath:mybatis-config.xml"/>
+    </bean>
+
+    <!--扫描器-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.Eanvan.mapper"/>
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+    </bean>
+
+    <!--线程池-->
+    <bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+        <property name="corePoolSize" value="10"/>
+        <property name="maxPoolSize" value="20"/>
+        <property name="queueCapacity" value="20"/>
+    </bean>
+
+
+</beans>
